@@ -1,0 +1,146 @@
+'use client';
+
+import {
+  CalendarDays,
+  Clock,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
+
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
+import { format, parseISO } from 'date-fns';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+import type { TaskStatus } from '@/shared/data';
+import type { AssignedTask } from '../interfaces/tasks';
+
+const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
+  pending: {
+    label: 'Pending',
+    className:
+      'bg-muted text-muted-foreground border-transparent hover:bg-muted',
+  },
+  in_progress: {
+    label: 'In Progress',
+    className:
+      'bg-primary/10 text-primary border-transparent hover:bg-primary/15',
+  },
+  completed: {
+    label: 'Completed',
+    className:
+      'bg-emerald-50 text-emerald-700 border-transparent hover:bg-emerald-100',
+  },
+};
+
+interface TaskCardProps {
+  task: AssignedTask;
+}
+
+export function TaskCard({ task }: TaskCardProps) {
+  const config = statusConfig[task.status];
+
+  const onEdit = (task: AssignedTask): void => {};
+  const onDelete = (task: AssignedTask): void => {};
+
+  return (
+    <div className="group bg-card rounded-xl border border-border p-5 transition-all hover:shadow-md hover:border-primary/20">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+        {/* Left content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <h3 className="font-semibold text-foreground text-[15px] leading-snug truncate">
+              {task.title}
+            </h3>
+            <Badge className={config.className}>{config.label}</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+            {task.description}
+          </p>
+        </div>
+
+        {/* Assigned user */}
+        {/* <div className="flex items-center gap-2 shrink-0 sm:ml-4">
+          <Avatar className="size-7">
+            <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
+              {task.assigned_to.name.slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs font-medium text-muted-foreground sm:hidden">
+            {task.assigned_to.name}
+          </span>
+        </div> */}
+
+        <div className="flex items-center gap-2 shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                aria-label={`Actions for ${task.title}`}
+              >
+                <MoreVertical className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={() => onEdit(task)}>
+                <Pencil className="size-4 mr-2" />
+                Edit Task
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => onDelete(task)}
+              >
+                <Trash2 className="size-4 mr-2" />
+                Delete Task
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Assigned user avatar (mobile) */}
+          <Avatar className="size-7 sm:hidden">
+            <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
+              {task.assigned_to.name.slice(0, 2).toLocaleUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      </div>
+
+      {/* Meta */}
+      <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <CalendarDays className="size-3.5" />
+          <span>Due {format(parseISO(task.due_date), 'MMM d, yyyy')}</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Clock className="size-3.5" />
+          <span>
+            Created {format(parseISO(task.created_at), 'MMM d, yyyy')}
+          </span>
+        </div>
+        <div className="hidden sm:flex items-center gap-1.5 ml-auto">
+          <Avatar className="size-5">
+            <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-semibold">
+              {task.assigned_to.name.slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-muted-foreground">
+            {task.assigned_to.name}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
