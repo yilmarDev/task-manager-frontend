@@ -1,19 +1,30 @@
-FROM node:20-alpine
+# -------------------------
+# Stage 1: Builder
+# -------------------------
+FROM node:20-alpine AS builder
 
-# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar los archivos de dependencias
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 
-# Instalar las dependencias de npm
-RUN npm install
+RUN npm ci
 
-# Copiar el resto de los archivos del frontend
 COPY . .
 
-# Exponer el puerto por defecto de Vite
-EXPOSE 5173
+# Build de producción
+RUN npm run build
 
-# Levantar el entorno de desarrollo y exponer al host
-CMD ["npm", "run", "dev", "--", "--host"]
+# -------------------------
+# Stage 2: Runtime
+# -------------------------
+FROM nginx:alpine
+
+RUN rm -rf /etc/nginx/conf.d/default.conf
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
