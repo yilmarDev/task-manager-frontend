@@ -240,7 +240,7 @@ export function EditTaskSheet({
                   <CommandList>
                     <CommandEmpty>No team member found.</CommandEmpty>
                     <CommandGroup>
-                      {usersGetter.data &&
+                      {usersGetter.data?.length &&
                         usersGetter.data.map((user) => (
                           <CommandItem
                             key={user.id}
