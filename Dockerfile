@@ -3,6 +3,9 @@
 # -------------------------
 FROM node:20-alpine AS builder
 
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -17,7 +20,7 @@ RUN npm run build
 # -------------------------
 # Stage 2: Runtime
 # -------------------------
-FROM nginx:alpine
+FROM nginx:alpine AS runner
 
 RUN rm -rf /etc/nginx/conf.d/default.conf
 
